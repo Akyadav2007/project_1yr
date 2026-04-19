@@ -1,36 +1,58 @@
-<!DOCTYPE html>
 <html>
 <head>
-    <title>Digital Clock</title>
+    <title>World Clock</title>
     <style>
-        #clock {
-            font-size: 40px;
-            font-weight: bold;
-            color: blue;
-            margin-top: 20px;
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+        .container {
+            text-align: center;
+            padding: 40px;
+            border-radius: 15px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+        }
+        .clock {
+            font-size: 30px;
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(0,0,0,0.3);
         }
     </style>
 </head>
 <body>
 
-<h2>Digital Clock</h2>
-<div id="clock"></div>
+<div class="container">
+    <h2> World Clock</h2>
+    <div class="clock">India: <span id="india"></span></div>
+    <div class="clock">Dubai: <span id="dubai"></span></div>
+    <div class="clock">UK: <span id="uk"></span></div>
+</div>
+
 <script>
-function showTime() {
-    let time = new Date();
-    let hours = time.getHours();
-    let minutes = time.getMinutes();
-    let seconds = time.getSeconds();
-
-    hours = (hours < 10 ? "0" + hours : hours);
-    minutes = (minutes < 10 ? "0" + minutes : minutes);
-    seconds = (seconds < 10 ? "0" + seconds : seconds);
-
-    document.getElementById("clock").innerHTML =
-        hours + ":" + minutes + ":" + seconds;
+function updateTime() {
+    let now = new Date();
+    // India (local)
+    document.getElementById("india").innerHTML =
+        now.toLocaleTimeString("en-IN");
+    // Dubai
+    document.getElementById("dubai").innerHTML =
+        now.toLocaleTimeString("en-US", { timeZone: "Asia/Dubai" });
+    // UK
+    document.getElementById("uk").innerHTML =
+        now.toLocaleTimeString("en-GB", { timeZone: "Europe/London" });
 }
-setInterval(showTime, 1000);
-showTime();
+
+setInterval(updateTime, 1000);
+updateTime();
 </script>
 </body>
 </html>
