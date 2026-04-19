@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notes App</title>
+
+<style>
+body {
+  font-family: Arial;
+  background: linear-gradient(135deg,#667eea,#764ba2);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.container {
+  background:white;
+  padding:20px;
+  border-radius:12px;
+  width:320px;
+  text-align:center;
+}
+
+input {
+  width:90%;
+  padding:8px;
+  margin:5px;
+}
+
+button {
+  padding:8px;
+  background:#667eea;
+  color:white;
+  border:none;
+  cursor:pointer;
+}
+
+ul {
+  list-style:none;
+  padding:0;
+}
+
+.hidden {
+  display:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- LOGIN -->
+  <div id="authBox">
+    <h2>Login / Signup</h2>
+    <input id="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <button onclick="signup()">Signup</button>
+    <button onclick="login()">Login</button>
+  </div>
+
+  <!-- APP -->
+  <div id="appBox" class="hidden">
+    <h2>My Notes</h2>
+    <input id="noteInput" placeholder="Write note">
+    <button onclick="addNote()">Add</button>
+    <ul id="list"></ul>
+    <button onclick="logout()">Logout</button>
+  </div>
+
+</div>
+
+<script>
+let token = localStorage.getItem("token");
+
+if(token){
+  showApp();
+  load();
+}
+
+function showApp(){
+  document.getElementById("authBox").classList.add("hidden");
+  document.getElementById("appBox").classList.remove("hidden");
+}
+
+function signup(){
+  fetch("/signup",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      email:email.value,
+      password:password.value
+    })
+  }).then(()=>alert("User created"));
+}
+
+async function login(){
+  const res = await fetch("/login",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      email:email.value,
+      password:password.value
+    })
+  });
+
+  const data = await res.json();
+
+  if(data.token){
+    localStorage.setItem("token",data.token);
+    token = data.token;
+    showApp();
+    load();
+  } else {
+    alert("Login failed");
+  }
+}
+
+async function load(){
+  const res = await fetch("/notes",{
+    headers:{Authorization:token}
+  });
+
+  const data = await res.json();
+  list.innerHTML="";
+
+  data.forEach(n=>{
+    const li=document.createElement("li");
+    li.innerHTML = n.text + 
+      ` <button onclick="del('${n._id}')">X</button>`;
+    list.appendChild(li);
+  });
+}
+
+async function addNote(){
+  await fetch("/notes",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      Authorization:token
+    },
+    body:JSON.stringify({text:noteInput.value})
+  });
+  noteInput.value="";
+  load();
+}
+
+async function del(id){
+  await fetch("/notes/"+id,{
+    method:"DELETE",
+    headers:{Authorization:token}
+  });
+  load();
+}
+
+function logout(){
+  localStorage.removeItem("token");
+  location.reload();
+}
+</script>
+
+</body>
+</html>
